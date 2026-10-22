@@ -1,4 +1,4 @@
-// NetScope — API functions for scans
+// NetDigno — API functions for scans
 
 import { apiClient } from './client';
 import type {

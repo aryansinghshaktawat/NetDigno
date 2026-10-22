@@ -1,4 +1,4 @@
-"""NetScope — Pydantic schemas for diagnostic endpoints."""
+"""NetDigno — Pydantic schemas for diagnostic endpoints."""
 from __future__ import annotations
 
 from typing import List, Optional

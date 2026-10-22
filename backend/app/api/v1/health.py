@@ -1,4 +1,4 @@
-"""NetScope — health endpoint."""
+"""NetDigno — health endpoint."""
 from __future__ import annotations
 
 from fastapi import APIRouter
@@ -16,7 +16,7 @@ async def health_check():
     """
     return {
         "status": "ok",
-        "service": "netscope",
+        "service": "netdigno",
         "version": "1.0.0",
         "nmap_available": nmap_available(),
     }

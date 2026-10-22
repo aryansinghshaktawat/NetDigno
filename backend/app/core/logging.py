@@ -1,4 +1,4 @@
-"""NetScope — structured JSON logging configuration."""
+"""NetDigno — structured JSON logging configuration."""
 from __future__ import annotations
 
 import logging

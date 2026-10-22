@@ -1,4 +1,4 @@
-"""NetScope — unit tests for scan database repository persistence."""
+"""NetDigno — unit tests for scan database repository persistence."""
 import pytest
 from app.models.base import create_tables, get_db
 from app.models.scan import ScanProfile, ScanStatus

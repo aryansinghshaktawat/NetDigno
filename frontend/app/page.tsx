@@ -155,7 +155,7 @@ function OverviewTab({
         <span className={`pulse-dot ${health?.status === "ok" ? "" : "offline"}`} />
         <div>
           <p style={{ fontWeight: 600 }}>
-            {health?.status === "ok" ? "NetScope Backend Online" : "Backend Unavailable"}
+            {health?.status === "ok" ? "NetDigno Backend Online" : "Backend Unavailable"}
           </p>
           <p style={{ fontSize: "0.8125rem", color: "var(--color-text-dim)" }}>
             Version {health?.version ?? "—"} &nbsp;·&nbsp;
@@ -898,7 +898,7 @@ function HistoryTab() {
                 <Alert type="warning">{comparison.reason}</Alert>
               ) : (
                 <>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "1rem" }}>
                     <div className="stat-card">
                       <span className="stat-label">New Open Ports</span>
                       <span className="stat-value" style={{ color: comparison.new_open_ports.length > 0 ? "var(--color-danger)" : undefined }}>
@@ -915,6 +915,12 @@ function HistoryTab() {
                       <span className="stat-label">Version Changes</span>
                       <span className="stat-value" style={{ color: comparison.version_changes.length > 0 ? "var(--color-accent)" : undefined }}>
                         {comparison.version_changes.length}
+                      </span>
+                    </div>
+                    <div className="stat-card">
+                      <span className="stat-label">New CVEs</span>
+                      <span className="stat-value" style={{ color: comparison.new_cves && comparison.new_cves.length > 0 ? "var(--color-danger)" : undefined }}>
+                        {comparison.new_cves?.length ?? 0}
                       </span>
                     </div>
                   </div>
@@ -940,7 +946,31 @@ function HistoryTab() {
                       ))}
                     </div>
                   )}
-                  {comparison.new_open_ports.length === 0 && comparison.closed_ports.length === 0 && comparison.version_changes.length === 0 && (
+                  {comparison.version_changes.length > 0 && (
+                    <div>
+                      <p className="form-label" style={{ marginBottom: "0.5rem" }}>Service Version Changes</p>
+                      {comparison.version_changes.map((c) => (
+                        <div key={`${c.port}-${c.protocol}`} style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.5rem 0", borderBottom: "1px solid var(--color-border)" }}>
+                          <code className="text-mono" style={{ color: "var(--color-accent)" }}>{c.port}/{c.protocol}</code>
+                          <span style={{ color: "var(--color-text-dim)", fontSize: "0.8125rem" }}>{c.baseline_value || "unknown"} → {c.current_value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {comparison.new_cves && comparison.new_cves.length > 0 && (
+                    <div>
+                      <p className="form-label" style={{ marginBottom: "0.5rem" }}>Newly Observed CVEs</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                        {comparison.new_cves.map((cve) => (
+                          <span key={cve} className="badge badge-error text-mono">{cve}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {comparison.new_open_ports.length === 0 &&
+                    comparison.closed_ports.length === 0 &&
+                    comparison.version_changes.length === 0 &&
+                    (!comparison.new_cves || comparison.new_cves.length === 0) && (
                     <Alert type="success">No observable changes between these two scans.</Alert>
                   )}
                   <p className="note-box">{comparison.note}</p>
@@ -1054,7 +1084,7 @@ export default function Home() {
               <Icon.Shield />
             </div>
             <div>
-              <p style={{ fontWeight: 700, fontSize: "1rem", letterSpacing: "-0.01em" }}>NetScope</p>
+              <p style={{ fontWeight: 700, fontSize: "1rem", letterSpacing: "-0.01em" }}>NetDigno</p>
               <p style={{ fontSize: "0.7rem", color: "var(--color-text-dim)", marginTop: "-0.125rem" }}>v1.0.0</p>
             </div>
           </div>

@@ -1,4 +1,4 @@
-// NetScope — TypeScript type definitions for all API responses
+// NetDigno — TypeScript type definitions for all API responses
 
 // ── Health ────────────────────────────────────────────────────────────────
 export interface HealthResponse {
@@ -115,6 +115,7 @@ export interface ComparisonResult {
   new_open_ports: PortChange[];
   closed_ports: PortChange[];
   version_changes: PortChange[];
+  new_cves?: string[];
   note: string;
 }
 

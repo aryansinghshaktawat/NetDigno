@@ -1,4 +1,4 @@
-"""NetScope — unit tests for Nmap XML parser."""
+"""NetDigno — unit tests for Nmap XML parser."""
 from __future__ import annotations
 
 import pytest

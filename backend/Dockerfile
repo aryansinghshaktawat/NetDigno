@@ -1,4 +1,4 @@
-# Backend Dockerfile — NetScope
+# Backend Dockerfile — NetDigno
 FROM python:3.11-slim
 
 # Install nmap and system tools
@@ -11,8 +11,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN groupadd --system netscope && \
-    useradd --system --gid netscope --no-create-home netscope
+RUN groupadd --system netdigno && \
+    useradd --system --gid netdigno --no-create-home netdigno
 
 # Set working directory
 WORKDIR /app
@@ -26,10 +26,10 @@ COPY main.py .
 COPY app/ ./app/
 
 # Create data directory for SQLite with correct ownership
-RUN mkdir -p /data && chown netscope:netscope /data
+RUN mkdir -p /data && chown netdigno:netdigno /data
 
 # Run as non-root
-USER netscope
+USER netdigno
 
 # Expose port
 EXPOSE 8000

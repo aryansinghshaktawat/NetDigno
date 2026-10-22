@@ -5,14 +5,14 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: netscope-backend
+    container_name: netdigno-backend
     ports:
       - "8000:8000"
     environment:
       - HOST=0.0.0.0
       - PORT=8000
       - LOG_LEVEL=INFO
-      - DATABASE_URL=sqlite+aiosqlite:////data/netscope.db
+      - DATABASE_URL=sqlite+aiosqlite:////data/netdigno.db
       - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
       - ALLOWED_TARGETS=127.0.0.1,::1,localhost,scanme.nmap.org,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       - QUICK_SCAN_TIMEOUT=120
@@ -22,10 +22,10 @@ services:
       - DIAGNOSTICS_RATE_LIMIT=30/minute
       - MAX_CONCURRENT_SCANS=3
     volumes:
-      - netscope_data:/data
+      - netdigno_data:/data
     restart: unless-stopped
     networks:
-      - netscope-network
+      - netdigno-network
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
       interval: 30s
@@ -37,7 +37,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: netscope-frontend
+    container_name: netdigno-frontend
     ports:
       - "3000:3000"
     environment:
@@ -47,7 +47,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - netscope-network
+      - netdigno-network
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
       interval: 30s
@@ -56,9 +56,9 @@ services:
       retries: 3
 
 networks:
-  netscope-network:
+  netdigno-network:
     driver: bridge
 
 volumes:
-  netscope_data:
+  netdigno_data:
     driver: local

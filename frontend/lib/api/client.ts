@@ -1,4 +1,4 @@
-// NetScope — typed API client
+// NetDigno — typed API client
 
 const getApiBase = (): string => {
   const envBase = process.env.NEXT_PUBLIC_API_URL;

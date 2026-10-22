@@ -1,4 +1,4 @@
-"""NetScope — unit tests for TCP diagnostics service."""
+"""NetDigno — unit tests for TCP diagnostics service."""
 from __future__ import annotations
 
 import socket

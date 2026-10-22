@@ -1,4 +1,4 @@
-"""NetScope — integration tests for diagnostics and scans API endpoints."""
+"""NetDigno — integration tests for diagnostics and scans API endpoints."""
 from __future__ import annotations
 
 import pytest

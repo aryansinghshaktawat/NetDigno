@@ -1,4 +1,4 @@
-"""NetScope — TCP connectivity diagnostics service."""
+"""NetDigno — TCP connectivity diagnostics service."""
 from __future__ import annotations
 
 import logging

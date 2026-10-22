@@ -1,4 +1,4 @@
-"""NetScope — diagnostics API endpoints."""
+"""NetDigno — diagnostics API endpoints."""
 
 import logging
 from fastapi import APIRouter, Body, HTTPException, Request, status

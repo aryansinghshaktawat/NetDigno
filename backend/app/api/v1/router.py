@@ -1,4 +1,4 @@
-"""NetScope — API v1 router aggregator."""
+"""NetDigno — API v1 router aggregator."""
 from fastapi import APIRouter
 
 from app.api.v1 import health, diagnostics, scans

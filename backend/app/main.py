@@ -1,4 +1,4 @@
-"""NetScope backend — FastAPI application factory."""
+"""NetDigno backend — FastAPI application factory."""
 from __future__ import annotations
 
 import logging
@@ -26,18 +26,18 @@ limiter = Limiter(key_func=get_remote_address)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: initialise database on startup."""
-    logger.info("NetScope backend starting — initialising database")
+    logger.info("NetDigno backend starting — initialising database")
     await create_tables()
     logger.info("Database ready")
     yield
-    logger.info("NetScope backend shutting down")
+    logger.info("NetDigno backend shutting down")
 
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="NetScope API",
+        title="NetDigno API",
         description=(
-            "Network Infrastructure Diagnostics & Security Assessment Platform. "
+            "NetDigno — Network Diagnostics & Security Platform. "
             "Provides DNS diagnostics, TCP connectivity checks, Nmap-based port "
             "and service discovery, persistent scan history, and change detection."
         ),

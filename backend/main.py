@@ -1,4 +1,4 @@
-"""NetScope — entry point (legacy compatibility and direct run support)."""
+"""NetDigno — entry point (legacy compatibility and direct run support)."""
 import uvicorn
 from app.main import app  # noqa: F401 — export for uvicorn
 

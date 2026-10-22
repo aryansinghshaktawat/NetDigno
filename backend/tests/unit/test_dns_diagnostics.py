@@ -1,4 +1,4 @@
-"""NetScope — unit tests for DNS diagnostics service."""
+"""NetDigno — unit tests for DNS diagnostics service."""
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch

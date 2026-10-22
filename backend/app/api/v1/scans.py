@@ -1,4 +1,4 @@
-"""NetScope — scans API endpoints."""
+"""NetDigno — scans API endpoints."""
 
 import asyncio
 import json

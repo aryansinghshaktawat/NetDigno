@@ -1,4 +1,4 @@
-"""NetScope — route/traceroute diagnostics service."""
+"""NetDigno — route/traceroute diagnostics service."""
 from __future__ import annotations
 
 import logging

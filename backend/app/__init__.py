@@ -1,1 +1,1 @@
-"""NetScope backend — application package."""
+"""NetDigno backend — application package."""

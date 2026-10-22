@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "NetScope — Network Diagnostics & Security Platform",
+  title: "NetDigno — Network Diagnostics & Security Platform",
   description:
     "Network infrastructure diagnostics and security assessment platform. DNS resolution, TCP connectivity checks, Nmap port scanning, scan history, and change detection.",
   keywords: ["network diagnostics", "port scanner", "nmap", "security assessment", "DNS lookup"],

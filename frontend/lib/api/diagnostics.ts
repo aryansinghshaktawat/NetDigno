@@ -1,4 +1,4 @@
-// NetScope — API functions for diagnostics
+// NetDigno — API functions for diagnostics
 
 import { apiClient } from './client';
 import type { DnsResult, TcpResult, RouteResult, HealthResponse } from '../types/api';

@@ -1,4 +1,4 @@
-"""NetScope — DNS diagnostics service using dnspython."""
+"""NetDigno — DNS diagnostics service using dnspython."""
 from __future__ import annotations
 
 import logging
