@@ -8,9 +8,7 @@ import type {
   RouteResult,
   ScanOut,
   ScanSummary,
-  PaginatedScans,
   ComparisonResult,
-  Finding,
   ScanProfile,
 } from "../lib/types/api";
 import {
@@ -499,12 +497,8 @@ function ScannerTab() {
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setInterval>;
-    if (loading) {
-      timer = setInterval(() => setElapsed((e) => e + 1), 1000);
-    } else {
-      setElapsed(0);
-    }
+    if (!loading) return;
+    const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
     return () => clearInterval(timer);
   }, [loading]);
 
@@ -516,6 +510,7 @@ function ScannerTab() {
 
   const runScan = async () => {
     if (!target.trim() || !authorized) return;
+    setElapsed(0);
     setLoading(true);
     setError(null);
     setResult(null);
@@ -533,7 +528,6 @@ function ScannerTab() {
   };
 
   const openFindings = result?.findings.filter((f) => f.state === "open") ?? [];
-  const otherFindings = result?.findings.filter((f) => f.state !== "open") ?? [];
 
   return (
     <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
@@ -734,7 +728,7 @@ function HistoryTab() {
 
   const PAGE_SIZE = 15;
 
-  const fetchScans = useCallback(async (p: number) => {
+  const loadScans = useCallback(async (p: number) => {
     setLoading(true);
     setError(null);
     try {
@@ -749,8 +743,25 @@ function HistoryTab() {
   }, []);
 
   useEffect(() => {
-    fetchScans(page);
-  }, [page, fetchScans]);
+    let active = true;
+    listScans({ page, page_size: PAGE_SIZE })
+      .then((data) => {
+        if (!active) return;
+        setScans(data.items);
+        setTotal(data.total);
+        setError(null);
+      })
+      .catch((e: unknown) => {
+        if (!active) return;
+        setError(e instanceof Error ? e.message : "Failed to load scan history");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [page]);
 
   const viewDetail = async (scanId: string) => {
     setDetailLoading(true);
@@ -786,7 +797,7 @@ function HistoryTab() {
         <div className="card-header">
           <span className="card-title">Scan History</span>
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button className="btn btn-secondary" onClick={() => fetchScans(page)} style={{ padding: "0.375rem 0.875rem" }}>
+            <button className="btn btn-secondary" onClick={() => loadScans(page)} style={{ padding: "0.375rem 0.875rem" }}>
               Refresh
             </button>
             <button

@@ -281,7 +281,7 @@ build/Release/
 tmp/
 temp/
 
-# Lock files (keep only one)
-package-lock.json
+# Alternate lock files (project uses npm package-lock.json)
 yarn.lock
+pnpm-lock.yaml
 bun.lock

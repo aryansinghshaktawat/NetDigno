@@ -113,7 +113,7 @@ def _parse_nmap_xml(xml_text: str) -> List[Dict]:
                     parts = [p for p in [product, version, extra] if p]
                     service_version = " ".join(parts)
                     cpe_el = service_el.find("cpe")
-                    cpe_str = cpe_el.text if cpe_el is not None else ""
+                    cpe_str = cpe_el.text if (cpe_el is not None and cpe_el.text is not None) else ""
 
                 # NSE script output
                 nse_lines: List[str] = []

@@ -156,8 +156,10 @@ async def start_scan(
     )
 
     # Reload with findings
-    scan = await get_scan_by_id(db, scan.id)
-    return _serialise_scan(scan)
+    reloaded_scan = await get_scan_by_id(db, scan.id)
+    if not reloaded_scan:
+        raise HTTPException(status_code=500, detail="Failed to retrieve completed scan")
+    return _serialise_scan(reloaded_scan)
 
 
 # ── GET /scans — paginated list ───────────────────────────────────────────────

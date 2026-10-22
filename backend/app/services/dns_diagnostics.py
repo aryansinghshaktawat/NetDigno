@@ -54,7 +54,7 @@ def resolve_dns(hostname: str) -> DnsResult:
     # ── A record ────────────────────────────────────────────────────────────
     try:
         answers = resolver.resolve(hostname, "A")
-        ipv4 = [rdata.address for rdata in answers]
+        ipv4 = [str(getattr(rdata, "address", str(rdata))) for rdata in answers]
     except Exception as exc:
         category, detail = _classify_dns_error(exc)
         error_category = category
@@ -65,7 +65,7 @@ def resolve_dns(hostname: str) -> DnsResult:
     if error_category is None or error_category == "NO_ANSWER":
         try:
             answers6 = resolver.resolve(hostname, "AAAA")
-            ipv6 = [rdata.address for rdata in answers6]
+            ipv6 = [str(getattr(rdata, "address", str(rdata))) for rdata in answers6]
         except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN):
             pass  # IPv6 absence is not an error
         except Exception as exc:

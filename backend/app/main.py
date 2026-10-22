@@ -49,7 +49,7 @@ def create_app() -> FastAPI:
 
     # ── Rate limiting ────────────────────────────────────────────────────────
     app.state.limiter = limiter
-    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
     # ── CORS ─────────────────────────────────────────────────────────────────
     origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]

@@ -46,7 +46,7 @@ def _resolve_to_ips(target: str) -> List[str]:
     """Resolve a hostname to its IP addresses. Returns empty list on failure."""
     try:
         results = socket.getaddrinfo(target, None)
-        return list({r[4][0] for r in results})
+        return list({str(r[4][0]) for r in results})
     except socket.gaierror:
         return []
 
