@@ -1,8 +1,8 @@
-# NetScope Security Policy & Controls
+# NetDigno Security Policy & Controls
 
 ## 1. Security Architecture & Threat Model
 
-NetScope is designed for authorized network infrastructure diagnostics and defensive security assessments within lab, staging, or corporate network boundaries.
+NetDigno is designed for authorized network infrastructure diagnostics and defensive security assessments within lab, staging, or corporate network boundaries.
 
 ```
        [ Client Request ]
@@ -19,7 +19,7 @@ NetScope is designed for authorized network infrastructure diagnostics and defen
               │
               ▼
    ┌──────────────────────┐
-   │ Target Allowlist     │  -> Enforces permitted IP/CIDR/Hostnames (HTTP 403)
+   │ Target Allowlist     │  -> Enforces permitted IP/CIDR/Hostnames & blocks metadata (HTTP 403)
    └──────────┬───────────┘
               │
               ▼
@@ -40,7 +40,7 @@ NetScope is designed for authorized network infrastructure diagnostics and defen
   - **Private RFC-1918 networks**: `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`
   - **Explicit hostnames**: e.g., `scanme.nmap.org`, `localhost`
 - **DNS Rebinding Prevention**: Hostnames are resolved to IP addresses *prior* to scan execution. Both the resolved IP address and the provided hostname must satisfy the allowlist criteria.
-- **Prohibited Destinations**: Cloud metadata endpoints (e.g., `169.254.169.254`, `metadata.google.internal`) are strictly prohibited unless specifically whitelisted in an isolated testing environment.
+- **Prohibited Destinations**: Cloud metadata endpoints (`169.254.0.0/16`, `169.254.169.254`), IPv6 link-local (`fe80::/10`), multicast (`224.0.0.0/4`), and zero-network (`0.0.0.0/8`) are permanently prohibited regardless of allowlist configuration.
 
 ### 2.2 Subprocess Security & Injection Prevention
 - All external tool invocations (`nmap`, `traceroute`) pass arguments as an explicit array (`list[str]`).
@@ -59,7 +59,7 @@ NetScope is designed for authorized network infrastructure diagnostics and defen
 - **Request Tracing**: A unique `X-Request-ID` UUID is attached to every request and response for correlation in structured logs.
 
 ### 2.4 Container Hardening
-- Backend Docker container creates and runs as an unprivileged user (`netscope:netscope`, UID: 10001).
+- Backend Docker container creates and runs as an unprivileged user (`netdigno:netdigno`).
 - No Docker socket or host root directory mounts.
 - Non-root containers prevent host privilege escalation in the event of an application vulnerability.
 
@@ -67,15 +67,15 @@ NetScope is designed for authorized network infrastructure diagnostics and defen
 
 ## 3. Assumptions and Known Limitations
 
-1. **Defensive Assessment Only**: NetScope is intended for administrators inspecting systems they own or have written permission to test.
-2. **TCP Connect vs SYN Scans**: NetScope runs TCP Connect scans (`-sT`) so it can operate without root / `CAP_NET_RAW` Linux privileges.
+1. **Defensive Assessment Only**: NetDigno is intended for administrators inspecting systems they own or have written permission to test.
+2. **TCP Connect vs SYN Scans**: NetDigno runs TCP Connect scans (`-sT`) so it can operate without root / `CAP_NET_RAW` Linux privileges.
 3. **Firewall & IDS Caveat**: Diagnostics and Nmap scans may be impacted or dropped by firewalls, NAT devices, or intrusion detection systems. Non-responsive ports cannot be guaranteed to be offline.
 
 ---
 
 ## 4. Reporting Security Vulnerabilities
 
-If you discover a security vulnerability in NetScope, please report it responsibly:
+If you discover a security vulnerability in NetDigno, please report it responsibly:
 - **Do not open a public GitHub issue.**
 - Submit an email to the maintainers or use GitHub Private Vulnerability Reporting.
 - Provide step-by-step reproduction instructions and impact assessment.

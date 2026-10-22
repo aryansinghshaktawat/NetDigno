@@ -1,4 +1,4 @@
-# NetScope API Reference (v1)
+# NetDigno API Reference (v1)
 
 Base URL: `/api/v1`
 
@@ -38,7 +38,7 @@ Returns application operational readiness and Nmap binary availability.
 ```json
 {
   "status": "ok",
-  "app_name": "NetScope",
+  "app_name": "NetDigno",
   "version": "1.0.0",
   "nmap_available": true,
   "nmap_version": "Nmap version 7.95"

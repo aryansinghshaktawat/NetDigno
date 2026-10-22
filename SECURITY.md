@@ -20,7 +20,7 @@ We appreciate your efforts to responsibly disclose security vulnerabilities. If 
 Instead, please report security vulnerabilities by:
 
 1. **Email**: Send details to [security@example.com] (replace with actual email)
-2. **Subject Line**: "Security Vulnerability in Vuln-Scanner-Webapp"
+2. **Subject Line**: "Security Vulnerability in NetDigno"
 3. **Include**:
    - Description of the vulnerability
    - Steps to reproduce

@@ -1,4 +1,4 @@
-# NetScope — Implementation Plan
+# NetDigno — Implementation Plan
 
 ## 1. Existing Architecture (Pre-Transformation)
 

@@ -1,8 +1,8 @@
-# 🛰️ NetScope — Network Infrastructure Diagnostics & Security Platform
+# 🛰️ NetDigno — Network Diagnostics & Security Platform
 
-**NetScope** is a production-minded network infrastructure diagnostics and security assessment platform. It evolves a legacy single-file script into an enterprise-ready, modular full-stack application for network engineers, systems administrators, and security teams.
+**NetDigno** is a production-minded network infrastructure diagnostics and security assessment platform. It evolves a legacy single-file script into an enterprise-ready, modular full-stack application for network engineers, systems administrators, and security teams.
 
-[![Tests](https://img.shields.io/badge/tests-54%20passed-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-58%20passed-brightgreen.svg)]()
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-16%20App%20Router-black.svg)](https://nextjs.org)
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://python.org)
@@ -19,8 +19,8 @@ Legacy vulnerability scanning scripts typically execute ad-hoc, untracked Nmap s
 - **Fragile Parsing**: Regex parsing of raw Nmap console text frequently misclassifies service versions and CVEs.
 - **Zero Diagnostics**: Network issues (such as DNS failure or firewall filtering) are often misdiagnosed as offline hosts.
 
-**NetScope solves these problems by providing:**
-1. **Target Allowlist Guardrails**: Enforces permitted IP, CIDR, and hostname ranges (e.g. lab environments and internal subnets) with pre-scan DNS resolution validation.
+**NetDigno solves these problems by providing:**
+1. **Target Allowlist & Anti-Rebinding Guardrails**: Enforces permitted IP, CIDR, and hostname ranges with pre-scan DNS resolution validation and hard rejection of cloud metadata endpoints (`169.254.0.0/16`) and link-local ranges (`fe80::/10`).
 2. **Layered Diagnostic Tools**: Independent DNS, TCP, and route diagnostic checks that distinguish between DNS resolution failures, connection timeouts, and filtered ports.
 3. **Structured XML Parsing**: Extracts open ports, services, versions, CPEs, and NSE script findings using strict XML ElementTree parsing.
 4. **Persistent Historical Records**: Stores all scan metadata and findings in an asynchronous SQLite database.
@@ -40,7 +40,7 @@ flowchart TD
     subgraph Backend["Backend API (FastAPI)"]
         Router["API v1 Router (/api/v1)"]
         Limiter["SlowAPI Rate Limiter"]
-        Allowlist["Target Allowlist Guardrail"]
+        Allowlist["Target Allowlist & Metadata Guardrail"]
         
         HealthEP["GET /api/v1/health"]
         DiagEP["POST /api/v1/diagnostics/*"]
@@ -202,14 +202,14 @@ DNS_TIMEOUT=5.0
 TCP_CONNECT_TIMEOUT=5.0
 
 # Database
-DATABASE_URL=sqlite+aiosqlite:///./data/netscope.db
+DATABASE_URL=sqlite+aiosqlite:///./data/netdigno.db
 ```
 
 ---
 
 ## 🧪 Testing
 
-NetScope includes a complete automated test suite covering unit tests and API integration tests:
+NetDigno includes a complete automated test suite covering unit tests and API integration tests:
 
 ```bash
 cd backend
@@ -221,7 +221,7 @@ pytest -v
 
 **Results:**
 ```
-======================== 54 passed in 0.52s ========================
+======================== 58 passed in 0.54s ========================
 ```
 
 To run frontend build & type checks:
@@ -236,10 +236,11 @@ For more details on tests and coverage, see [docs/TESTING.md](docs/TESTING.md).
 
 ## 🛡️ Security Limitations & Guardrails
 
-- **Defensive Scope**: NetScope is designed strictly for networks you own or are legally authorized to test.
+- **Defensive Scope**: NetDigno is designed strictly for networks you own or are legally authorized to test.
 - **TCP Connect Scans**: By default, scans use TCP connect (`-sT`), allowing execution inside unprivileged non-root containers without needing raw network socket privileges (`CAP_NET_RAW`).
+- **Cloud Metadata & Link-Local Protections**: Target allowlist blocks cloud metadata (`169.254.0.0/16`) and link-local ranges, validating resolved IPs to prevent DNS rebinding attacks.
 - **Firewalls & Filters**: Packet drops, firewall filtering, and rate limits on target routers can cause ports to appear closed or filtered. A failed connection does not confirm a host outage.
-- **Allowlist Enforced**: Targets outside `ALLOWED_TARGETS` are rejected with HTTP 403 Forbidden.
+- **Allowlist Enforced**: Targets outside `ALLOWED_TARGETS` are rejected with HTTP 403 Forbidden without executing subprocesses.
 
 For complete security disclosure, review [docs/SECURITY.md](docs/SECURITY.md).
 

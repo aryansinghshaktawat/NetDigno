@@ -1,8 +1,8 @@
-# NetScope Architecture
+# NetDigno Architecture
 
 ## 1. System Overview
 
-**NetScope** is a modern network infrastructure diagnostics and security assessment platform. It evolves a legacy single-file script into an enterprise-ready, modular full-stack application capable of:
+**NetDigno** is a modern network infrastructure diagnostics and security assessment platform. It evolves a legacy single-file script into an enterprise-ready, modular full-stack application capable of:
 
 - Safe DNS resolution diagnostics (A and AAAA records, timing, error classification)
 - Bounded TCP port connectivity verification with precise timing
@@ -100,7 +100,7 @@ backend/
 ├── tests/                  # Automated pytest test suite
 │   ├── unit/               # Unit tests (allowlist, parser, diff, repo, diag)
 │   └── integration/        # Full FastAPI HTTP endpoint tests
-├── Dockerfile              # Hardened container with non-root netscope user
+├── Dockerfile              # Hardened container with non-root netdigno user
 └── requirements.txt        # Pinned dependencies
 ```
 
@@ -124,7 +124,7 @@ backend/
 
 ## 3. Data Persistence Model
 
-NetScope uses an asynchronous SQLite database using SQLAlchemy 2.0 and `aiosqlite`.
+NetDigno uses an asynchronous SQLite database using SQLAlchemy 2.0 and `aiosqlite`.
 
 ```mermaid
 erDiagram
@@ -183,7 +183,7 @@ erDiagram
    - `service`: Service version detection (`-sV -sT -T4 --top-ports 250`).
    - `vuln`: Service detection plus vulnerability scanning scripts (`-sV -sT --script vuln`).
 2. **XML Parsing**:
-   - Rather than relying on fragile regex on terminal output, NetScope executes with `-oX -` to produce structured XML.
+   - Rather than relying on fragile regex on terminal output, NetDigno executes with `-oX -` to produce structured XML.
    - `xml.etree.ElementTree` extracts port states, service names, product versions, CPE identifiers, and NSE script tables.
    - CVE identifiers are extracted from script IDs and CVE references with strict format matching (`CVE-\d{4}-\d{4,7}`).
 3. **Snapshot Comparison & Drift Detection**:

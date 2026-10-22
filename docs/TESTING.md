@@ -1,6 +1,6 @@
-# NetScope Testing Guide
+# NetDigno Testing Guide
 
-NetScope maintains a comprehensive automated testing suite covering unit tests, integration tests, and frontend build verification.
+NetDigno maintains a comprehensive automated testing suite covering unit tests, integration tests, and frontend build verification.
 
 ---
 
@@ -11,10 +11,10 @@ The testing strategy focuses on high-confidence, deterministic tests that do not
 ```
 backend/tests/
 ├── unit/
-│   ├── test_allowlist.py         # 11 tests: Loopback, RFC-1918, Hostname, Length, Edge cases
+│   ├── test_allowlist.py         # 14 tests: Loopback, RFC-1918, Hostname, Cloud Metadata, Link-Local IPv6, DNS Rebinding
 │   ├── test_dns_diagnostics.py   # 4 tests: Success, NXDOMAIN, Timeout, Unknown errors
 │   ├── test_nmap_parser.py       # 13 tests: Valid XML, Empty, Malformed, CVE extraction, Evidence
-│   ├── test_scan_comparison.py   # 7 tests: Incomplete scans, Target mismatch, Ports open/closed, Diff
+│   ├── test_scan_comparison.py   # 8 tests: Incomplete scans, Target mismatch, Ports open/closed, Version diff, CVE diff
 │   ├── test_scan_repository.py   # 3 tests: Async CRUD, Eager loading, Pagination/Filter
 │   └── test_tcp_diagnostics.py   # 4 tests: Connection open, Timeout, ECONNREFUSED, Unreachable
 └── integration/
@@ -57,18 +57,18 @@ pytest --cov=app --cov-report=term-missing tests/
 
 ## 3. Verified Backend Test Results
 
-All 54 test cases execute deterministically in **< 1.0 second**:
+All 58 test cases execute deterministically in **< 1.0 second**:
 
 | Test Suite | Total Tests | Status | Execution Time |
 |:---|:---:|:---:|:---:|
 | `tests/integration/test_api.py` | 13 | PASS | 0.28s |
-| `tests/unit/test_allowlist.py` | 11 | PASS | 0.05s |
+| `tests/unit/test_allowlist.py` | 14 | PASS | 0.05s |
 | `tests/unit/test_dns_diagnostics.py` | 4 | PASS | 0.03s |
 | `tests/unit/test_nmap_parser.py` | 13 | PASS | 0.04s |
-| `tests/unit/test_scan_comparison.py` | 7 | PASS | 0.02s |
+| `tests/unit/test_scan_comparison.py` | 8 | PASS | 0.02s |
 | `tests/unit/test_scan_repository.py` | 3 | PASS | 0.08s |
 | `tests/unit/test_tcp_diagnostics.py` | 4 | PASS | 0.02s |
-| **Total** | **54** | **100% PASS** | **0.52s** |
+| **Total** | **58** | **100% PASS** | **0.54s** |
 
 ---
 
