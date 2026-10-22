@@ -1,4 +1,4 @@
-"""NetScope — Nmap execution and XML parsing service."""
+"""NetDigno — Nmap execution and XML parsing service."""
 from __future__ import annotations
 
 import json
@@ -7,7 +7,7 @@ import re
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 from app.core.config import settings
@@ -194,7 +194,7 @@ def run_nmap_scan(target: str, profile: str) -> NmapScanResult:
     command = [nmap_path] + profile_args + [target]
     logger.info("Executing Nmap: profile=%s target=%s timeout=%ds", profile, target, timeout)
 
-    start = datetime.utcnow()
+    start = datetime.now(timezone.utc)
     result = NmapScanResult(
         command=command,
         exit_code=-1,
@@ -212,7 +212,7 @@ def run_nmap_scan(target: str, profile: str) -> NmapScanResult:
             timeout=timeout,
             shell=False,
         )
-        elapsed = (datetime.utcnow() - start).total_seconds()
+        elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         result.exit_code = proc.returncode
         result.stdout = proc.stdout or ""
         result.stderr = proc.stderr or ""
@@ -234,7 +234,7 @@ def run_nmap_scan(target: str, profile: str) -> NmapScanResult:
         )
 
     except subprocess.TimeoutExpired:
-        elapsed = (datetime.utcnow() - start).total_seconds()
+        elapsed = (datetime.now(timezone.utc) - start).total_seconds()
         result.duration_seconds = elapsed
         result.timed_out = True
         result.error_message = f"Nmap scan timed out after {timeout}s."

@@ -1,4 +1,4 @@
-"""NetScope — unit tests for allowlist enforcement."""
+"""NetDigno — unit tests for allowlist enforcement."""
 from __future__ import annotations
 
 import pytest
@@ -81,3 +81,24 @@ def test_empty_allowlist_blocks_everything(monkeypatch):
     _set_allowlist(monkeypatch, "")
     with pytest.raises(AllowlistError):
         validate_target_allowed("127.0.0.1")
+
+
+# ── Prohibited destinations (Cloud metadata & Link-local) ──────────────────
+
+def test_prohibited_cloud_metadata_ip_blocked(monkeypatch):
+    _set_allowlist(monkeypatch, "0.0.0.0/0")
+    with pytest.raises(AllowlistError, match="prohibited destination"):
+        validate_target_allowed("169.254.169.254")
+
+
+def test_prohibited_link_local_ipv6_blocked(monkeypatch):
+    _set_allowlist(monkeypatch, "::/0")
+    with pytest.raises(AllowlistError, match="prohibited destination"):
+        validate_target_allowed("fe80::1")
+
+
+def test_prohibited_dns_rebinding_blocked(monkeypatch):
+    _set_allowlist(monkeypatch, "evil-rebinding.local,10.0.0.0/8")
+    with patch("app.security.allowlist._resolve_to_ips", return_value=["169.254.169.254"]):
+        with pytest.raises(AllowlistError, match="resolves to a prohibited destination"):
+            validate_target_allowed("evil-rebinding.local")

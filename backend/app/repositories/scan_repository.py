@@ -1,9 +1,9 @@
-"""NetScope — scan and finding database repositories."""
+"""NetDigno — scan and finding database repositories."""
 from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from sqlalchemy import func, select
@@ -32,7 +32,7 @@ async def create_scan(
 
 async def update_scan_running(db: AsyncSession, scan: Scan) -> Scan:
     scan.status = ScanStatus.RUNNING
-    scan.started_at = datetime.utcnow()
+    scan.started_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(scan)
     return scan
@@ -51,7 +51,7 @@ async def complete_scan(
     raw_output: Optional[str] = None,
 ) -> Scan:
     scan.status = status
-    scan.completed_at = datetime.utcnow()
+    scan.completed_at = datetime.now(timezone.utc)
     scan.duration_seconds = duration_seconds
     scan.nmap_command = nmap_command
     scan.exit_code = exit_code

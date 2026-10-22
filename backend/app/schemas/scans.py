@@ -1,4 +1,4 @@
-"""NetScope — Pydantic schemas for scan endpoints."""
+"""NetDigno — Pydantic schemas for scan endpoints."""
 from __future__ import annotations
 
 from datetime import datetime
@@ -119,6 +119,7 @@ class ComparisonResult(BaseModel):
     new_open_ports: List[PortChange] = []
     closed_ports: List[PortChange] = []
     version_changes: List[PortChange] = []
+    new_cves: List[str] = []
     note: str = (
         "Changes are based on what was observed in each scan at its specific "
         "time. A port classified as newly open was not observed open in the "

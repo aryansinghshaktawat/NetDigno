@@ -1,4 +1,4 @@
-"""NetScope — unit tests for scan comparison service."""
+"""NetDigno — unit tests for scan comparison service."""
 from __future__ import annotations
 
 import pytest
@@ -18,12 +18,13 @@ def _make_scan(id: str, target: str, status: str, findings: list) -> Scan:
     return scan
 
 
-def _make_finding(port: int, protocol: str, state: str, version: str = ""):
+def _make_finding(port: int, protocol: str, state: str, version: str = "", cve_refs=None):
     f = MagicMock()
     f.port = port
     f.protocol = protocol
     f.state = state
     f.version = version
+    f.cve_refs = cve_refs
     return f
 
 
@@ -102,7 +103,23 @@ def test_no_changes_returns_empty_lists():
         _make_finding(22, "tcp", "open", version="OpenSSH 8.2"),
     ])
     result = compare_scans(baseline, current)
-    assert result.comparable is True
     assert len(result.new_open_ports) == 0
     assert len(result.closed_ports) == 0
     assert len(result.version_changes) == 0
+    assert len(result.new_cves) == 0
+
+
+def test_new_cves_detected():
+    import json
+    f_old = _make_finding(80, "tcp", "open")
+    f_old.cve_refs = json.dumps(["CVE-2021-1234"])
+
+    f_new = _make_finding(80, "tcp", "open")
+    f_new.cve_refs = json.dumps(["CVE-2021-1234", "CVE-2023-5678"])
+
+    baseline = _make_scan("b1", "127.0.0.1", ScanStatus.COMPLETED, [f_old])
+    current = _make_scan("c1", "127.0.0.1", ScanStatus.COMPLETED, [f_new])
+
+    result = compare_scans(baseline, current)
+    assert result.comparable is True
+    assert result.new_cves == ["CVE-2023-5678"]

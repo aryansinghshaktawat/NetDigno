@@ -1,8 +1,8 @@
-"""NetScope — Finding ORM model."""
+"""NetDigno — Finding ORM model."""
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -24,6 +24,8 @@ class Finding(Base):
     nse_output: Mapped[str | None] = mapped_column(Text, nullable=True)
     cve_refs: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON list stored as text
     evidence: Mapped[str | None] = mapped_column(Text, nullable=True)
-    recorded_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    recorded_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
 
     scan: Mapped["Scan"] = relationship("Scan", back_populates="findings")  # type: ignore[name-defined]

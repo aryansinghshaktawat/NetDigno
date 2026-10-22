@@ -1,8 +1,9 @@
-"""NetScope — scan comparison service."""
+"""NetDigno — scan comparison service."""
 from __future__ import annotations
 
+import json
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from app.models.scan import Scan, ScanStatus
 from app.schemas.scans import ComparisonResult, PortChange
@@ -10,9 +11,25 @@ from app.schemas.scans import ComparisonResult, PortChange
 logger = logging.getLogger(__name__)
 
 
+def _extract_scan_cves(scan: Scan) -> Set[str]:
+    """Extract all unique CVE IDs associated with a scan's findings."""
+    cves: Set[str] = set()
+    for f in (scan.findings or []):
+        if f.cve_refs:
+            try:
+                loaded = json.loads(f.cve_refs)
+                if isinstance(loaded, list):
+                    cves.update(c.upper() for c in loaded if isinstance(c, str))
+                elif isinstance(loaded, str):
+                    cves.add(loaded.upper())
+            except (json.JSONDecodeError, TypeError):
+                cves.add(str(f.cve_refs).upper())
+    return cves
+
+
 def compare_scans(baseline: Scan, current: Scan) -> ComparisonResult:
     """
-    Compare two Scan records and identify port-state and version changes.
+    Compare two Scan records and identify port-state, version, and CVE changes.
 
     Args:
         baseline: The earlier (reference) scan.
@@ -59,7 +76,7 @@ def compare_scans(baseline: Scan, current: Scan) -> ComparisonResult:
     def _port_map(scan: Scan) -> Dict[Tuple[int, str], str]:
         """Return {(port, protocol): state} for open findings."""
         m: Dict[Tuple[int, str], str] = {}
-        for f in scan.findings:
+        for f in (scan.findings or []):
             if f.port is not None and f.protocol:
                 m[(f.port, f.protocol)] = f.state or "unknown"
         return m
@@ -67,7 +84,7 @@ def compare_scans(baseline: Scan, current: Scan) -> ComparisonResult:
     def _version_map(scan: Scan) -> Dict[Tuple[int, str], str]:
         """Return {(port, protocol): version} for open findings."""
         m: Dict[Tuple[int, str], str] = {}
-        for f in scan.findings:
+        for f in (scan.findings or []):
             if f.port is not None and f.protocol:
                 m[(f.port, f.protocol)] = f.version or ""
         return m
@@ -114,10 +131,15 @@ def compare_scans(baseline: Scan, current: Scan) -> ComparisonResult:
                     current_value=cv or "(unknown)",
                 ))
 
+    # ── CVE differences ──────────────────────────────────────────────────────
+    baseline_cves = _extract_scan_cves(baseline)
+    current_cves = _extract_scan_cves(current)
+    new_cves = sorted(list(current_cves - baseline_cves))
+
     logger.info(
-        "Comparison %s vs %s: %d new, %d closed, %d version changes",
+        "Comparison %s vs %s: %d new open, %d closed, %d version changes, %d new CVEs",
         baseline.id, current.id,
-        len(new_open), len(closed), len(version_changes),
+        len(new_open), len(closed), len(version_changes), len(new_cves),
     )
 
     return ComparisonResult(
@@ -128,4 +150,5 @@ def compare_scans(baseline: Scan, current: Scan) -> ComparisonResult:
         new_open_ports=new_open,
         closed_ports=closed,
         version_changes=version_changes,
+        new_cves=new_cves,
     )
