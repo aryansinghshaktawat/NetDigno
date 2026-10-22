@@ -1,117 +1,116 @@
-<div align="center">
+# 🛰️ NetScope — Network Infrastructure Diagnostics & Security Platform
 
-# 🛡️ Vulnerability Scanner Web Application
+**NetScope** is a production-minded network infrastructure diagnostics and security assessment platform. It evolves a legacy single-file script into an enterprise-ready, modular full-stack application for network engineers, systems administrators, and security teams.
 
-### Automated Network Security Scanning with Nmap
-
-A modern, full-stack web application for automated network vulnerability scanning using Nmap. Built with Next.js 14 frontend and FastAPI backend.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688.svg)](https://fastapi.tiangolo.com/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub issues](https://img.shields.io/github/issues/aryansinghshaktawat/vuln-scanner-webapp)](https://github.com/aryansinghshaktawat/vuln-scanner-webapp/issues)
-[![GitHub stars](https://img.shields.io/github/stars/aryansinghshaktawat/vuln-scanner-webapp)](https://github.com/aryansinghshaktawat/vuln-scanner-webapp/stargazers)
-
-[Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-documentation) • [Contributing](#-contributing) • [License](#-license)
+[![Tests](https://img.shields.io/badge/tests-54%20passed-brightgreen.svg)]()
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://fastapi.tiangolo.com)
+[![Next.js](https://img.shields.io/badge/Next.js-16%20App%20Router-black.svg)](https://nextjs.org)
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://docker.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-</div>
+## 📌 Problem Solved
 
-## ✨ Features
+Legacy vulnerability scanning scripts typically execute ad-hoc, untracked Nmap scans from arbitrary shells without security boundaries, structured storage, or comparison over time:
+- **No Target Scoping**: Blindly scanning any IP or hostname without validation introduces compliance, security, and cloud abuse risks.
+- **No Temporal History**: Scan output printed to terminal stdout vanishes, leaving no audit trail of which ports were opened or closed.
+- **Fragile Parsing**: Regex parsing of raw Nmap console text frequently misclassifies service versions and CVEs.
+- **Zero Diagnostics**: Network issues (such as DNS failure or firewall filtering) are often misdiagnosed as offline hosts.
 
-- 🔍 **Automated Port Scanning**: Discovers open ports and running services
-- 🛡️ **Vulnerability Detection**: Identifies CVE vulnerabilities using Nmap's vulnerability scripts
-- 🎨 **Modern UI**: Clean, responsive interface built with Tailwind CSS
-- ⚡ **Real-time Results**: Live scanning with progress indicators
-- 🔗 **CVE Integration**: Direct links to MITRE CVE database for vulnerability details
-- 🌐 **Cross-platform**: Works on macOS, Linux, and Windows (with Nmap installed)
-- ✅ **Error Handling**: Comprehensive validation and user-friendly error messages
-- 🐳 **Docker Ready**: One-command deployment with Docker Compose
+**NetScope solves these problems by providing:**
+1. **Target Allowlist Guardrails**: Enforces permitted IP, CIDR, and hostname ranges (e.g. lab environments and internal subnets) with pre-scan DNS resolution validation.
+2. **Layered Diagnostic Tools**: Independent DNS, TCP, and route diagnostic checks that distinguish between DNS resolution failures, connection timeouts, and filtered ports.
+3. **Structured XML Parsing**: Extracts open ports, services, versions, CPEs, and NSE script findings using strict XML ElementTree parsing.
+4. **Persistent Historical Records**: Stores all scan metadata and findings in an asynchronous SQLite database.
+5. **Snapshot Comparison & Drift Detection**: Compares any two completed scans for the same host to highlight new open ports, closed ports, service version upgrades, and new CVEs.
+6. **Unified Web Dashboard**: Responsive Next.js interface with real-time feedback, detailed modal inspection, and live diagnostics.
+
+---
 
 ## 🏗️ Architecture
 
+```mermaid
+flowchart TD
+    subgraph Frontend["Frontend Client (Next.js 16 + React 19)"]
+        UI["Dashboard Tabs:\n• Overview\n• Diagnostics (DNS/TCP/Route)\n• Scanner (Quick/Service/Vuln)\n• Scan History & Snapshot Diff"]
+    end
+
+    subgraph Backend["Backend API (FastAPI)"]
+        Router["API v1 Router (/api/v1)"]
+        Limiter["SlowAPI Rate Limiter"]
+        Allowlist["Target Allowlist Guardrail"]
+        
+        HealthEP["GET /api/v1/health"]
+        DiagEP["POST /api/v1/diagnostics/*"]
+        ScanEP["POST & GET /api/v1/scans/*"]
+    end
+
+    subgraph Engines["Diagnostic & Scanner Engines"]
+        DNS["dnspython Engine"]
+        TCP["socket.create_connection Engine"]
+        Route["traceroute / tracepath Engine"]
+        Nmap["Nmap Async Subprocess & XML Parser"]
+        Diff["Snapshot Drift Detector"]
+    end
+
+    subgraph Storage["Data Layer"]
+        DB[(SQLite / aiosqlite)]
+        ScansTable["scans table"]
+        FindingsTable["findings table"]
+    end
+
+    UI -->|"HTTP / REST API"| Router
+    Router --> Limiter
+    Limiter --> Allowlist
+    Allowlist --> HealthEP
+    Allowlist --> DiagEP
+    Allowlist --> ScanEP
+
+    DiagEP --> DNS
+    DiagEP --> TCP
+    DiagEP --> Route
+    ScanEP --> Nmap
+    ScanEP --> Diff
+    ScanEP --> DB
+    Diff --> DB
+
+    DB --- ScansTable
+    DB --- FindingsTable
 ```
-vuln-scanner-webapp/
-├── backend/           # FastAPI Python backend
-│   ├── main.py       # Core application with Nmap integration
-│   └── __pycache__/
-├── frontend/         # Next.js 14 React frontend
-│   ├── app/
-│   │   ├── page.tsx  # Main scanning interface
-│   │   └── layout.tsx
-│   ├── package.json
-│   └── ...
-└── README.md
-```
 
-## 🛠️ Tech Stack
+For complete technical specifications, review [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-### Frontend
-- **Next.js 14** with App Router
-- **TypeScript** for type safety
-- **Tailwind CSS** for styling
-- **React** with hooks for state management
+---
 
-### Backend
-- **FastAPI** for high-performance API
-- **Python 3.8+** runtime
-- **Uvicorn** ASGI server
-- **Nmap** for network scanning
-- **Subprocess** for secure command execution
+## 🛠️ Technology Stack
+
+| Layer | Technology | Rationale |
+|:---|:---|:---|
+| **Frontend** | Next.js 16 (App Router), React 19, TypeScript | Server and client component efficiency, strict typing |
+| **Styling** | Tailwind CSS 4, custom dark theme tokens | Sleek, modern operations center aesthetic |
+| **Backend** | Python 3.11 / 3.12, FastAPI, Uvicorn | High-concurrency async ASGI web framework |
+| **Database** | SQLite, SQLAlchemy 2.0 (Async), aiosqlite | Zero-maintenance persistent storage with migration readiness |
+| **Diagnostics** | dnspython 2.7, Python socket, traceroute | Standards-compliant DNS lookups & bounded socket connections |
+| **Scanning** | Nmap 7.9+, `xml.etree.ElementTree` | Industry standard network scanner with robust XML output parsing |
+| **Security** | SlowAPI (rate limiting), Python `ipaddress` | Token-bucket rate limiting and strict CIDR/IP allowlists |
+| **Containers** | Docker, Docker Compose | Non-root container runtime with health checks |
+
+---
 
 ## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed:
+- **Node.js**: v18.0.0 or higher
+- **Python**: v3.11 or v3.12
+- **Nmap**: Installed locally (`brew install nmap` on macOS, `sudo apt-get install nmap` on Debian/Ubuntu)
+- *(Optional)* **Docker & Docker Compose**: For containerized deployment
 
-- **Node.js** (v18 or later) or **Bun** runtime
-- **Python** (3.8 or later)
-- **Nmap** network scanner
+---
 
-### Installing Nmap
+## 🚀 Quick Start (Local Installation)
 
-**macOS:**
-```bash
-brew install nmap
-```
-
-**Linux (Ubuntu/Debian):**
-```bash
-sudo apt-get update
-sudo apt-get install nmap
-```
-
-**Windows:**
-Download and install from [nmap.org](https://nmap.org/download.html)
-
-## 🚀 Quick Start
-
-### Option 1: Docker (Recommended)
-
-**Prerequisites:** Docker and Docker Compose installed
-
-```bash
-# Clone the repository
-git clone https://github.com/aryansinghshaktawat/vuln-scanner-webapp.git
-cd vuln-scanner-webapp
-
-# Start with Docker Compose
-docker-compose up -d
-
-# Access the application
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:8000
-# API Docs: http://localhost:8000/docs
-```
-
-For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md).
-
-### Option 2: Manual Setup
-
-### 1. Clone the Repository
+### 1. Clone & Configure
 ```bash
 git clone https://github.com/aryansinghshaktawat/vuln-scanner-webapp.git
 cd vuln-scanner-webapp
@@ -121,269 +120,141 @@ cd vuln-scanner-webapp
 ```bash
 cd backend
 
-# Create virtual environment
-python -m venv .venv
-
-# Activate virtual environment
-# macOS/Linux:
+# Create and activate virtual environment
+python3 -m venv .venv
 source .venv/bin/activate
-# Windows:
-# .venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Copy environment file
+# Configure environment
 cp .env.example .env
 
-# Start the backend server
+# Start FastAPI backend (port 8000)
 uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+Verify backend health:
+```bash
+curl http://127.0.0.1:8000/api/v1/health
 ```
 
 ### 3. Frontend Setup
 ```bash
-cd frontend
+cd ../frontend
 
 # Install dependencies
 npm install
-# or with bun:
-# bun install
 
-# Copy environment file
-cp .env.example .env.local
-
-# Start the frontend development server
+# Start development server (port 3000)
 npm run dev
-# or with bun:
-# bun dev
 ```
 
-### 4. Access the Application
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://127.0.0.1:8000
-- **API Documentation**: http://127.0.0.1:8000/docs
-
-## 🎯 Usage
-
-1. **Open the web application** at http://localhost:3000
-2. **Enter a target** (domain name or IP address) in the input field
-   - Example: `scanme.nmap.org`, `127.0.0.1`, `google.com`
-3. **Click "Start Scan"** or press Enter
-4. **Wait for results** (typically 30-120 seconds depending on target)
-5. **View the results**:
-   - Open ports table with service information
-   - CVE vulnerabilities with links to MITRE database
-
-### Example Scan Targets
-
-- `scanme.nmap.org` - Official Nmap test server
-- `127.0.0.1` - Your local machine
-- `httpbin.org` - HTTP testing service
-
-## 🔧 API Endpoints
-
-### GET `/`
-Returns backend status
-```json
-{"message": "Backend is working!"}
-```
-
-### GET `/scan?target=<target>`
-Performs vulnerability scan on the specified target
-
-**Parameters:**
-- `target` (string): Domain name or IP address to scan
-
-**Response:**
-```json
-{
-  "target": "scanme.nmap.org",
-  "open_ports": [
-    {
-      "port": "80/tcp",
-      "state": "open",
-      "service": "http",
-      "version": "Apache httpd 2.4.7"
-    }
-  ],
-  "cves": ["CVE-2021-34527", "CVE-2021-1675"]
-}
-```
-
-**Error Responses:**
-- `400` - Invalid target format
-- `408` - Scan timeout
-- `500` - Nmap not installed or scan failed
-
-## 🔒 Security Considerations
-
-- **Input Validation**: All targets are validated before scanning
-- **Command Injection Protection**: Subprocess calls are properly sanitized
-- **Timeout Limits**: Scans are limited to prevent hanging
-- **Error Handling**: Sensitive error details are not exposed to users
-- **CORS Configuration**: Proper cross-origin request handling
-
-## 🧪 Testing
-
-### Backend Testing
-```bash
-cd backend
-
-# Test API endpoints
-curl "http://127.0.0.1:8000/"
-curl "http://127.0.0.1:8000/scan?target=127.0.0.1"
-```
-
-### Frontend Testing
-1. Open http://localhost:3000
-2. Test with various targets (valid domains, IPs, invalid inputs)
-3. Verify responsive design on mobile and desktop
-4. Test error states (invalid targets, backend offline)
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-**"Nmap not installed" Error**
-```bash
-# Check if nmap is installed
-which nmap
-nmap --version
-
-# Install if missing (macOS)
-brew install nmap
-```
-
-**Backend Connection Failed**
-- Ensure backend is running on port 8000
-- Check firewall settings
-- Verify CORS configuration
-
-**Scan Timeouts**
-- Some targets may take longer to scan
-- Increase timeout values in backend code if needed
-- Check network connectivity to target
-
-**Permission Denied**
-```bash
-# Some nmap scans require sudo (especially SYN scans)
-# The application uses TCP connect scans which don't require privileges
-```
-
-## 📁 Project Structure
-
-```
-vuln-scanner-webapp/
-├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── requirements.txt     # Python dependencies
-│   ├── Dockerfile           # Backend Docker image
-│   ├── .env.example         # Environment variables template
-│   ├── .venv/              # Python virtual environment
-│   └── __pycache__/        # Python cache
-├── frontend/
-│   ├── app/
-│   │   ├── page.tsx        # Main scan interface
-│   │   ├── layout.tsx      # App layout
-│   │   └── globals.css     # Global styles
-│   ├── public/             # Static assets
-│   ├── package.json        # Dependencies
-│   ├── Dockerfile          # Frontend Docker image
-│   ├── .env.example        # Environment variables template
-│   ├── tsconfig.json       # TypeScript config
-│   └── next.config.ts      # Next.js configuration
-├── docker-compose.yml      # Docker Compose configuration
-├── DEPLOYMENT.md           # Deployment guide
-├── CONTRIBUTING.md         # Contributing guidelines
-├── LICENSE                 # MIT License
-├── README.md
-└── TaskList                # Development task list
-```
-
-## 🔮 Future Enhancements
-
-- [ ] **Scan History**: Store and manage previous scan results
-- [ ] **Export Reports**: Download results as PDF/JSON
-- [ ] **Advanced Scanning**: OS detection, stealth scans
-- [ ] **User Authentication**: Multi-user support
-- [ ] **Database Integration**: Persistent data storage
-- [ ] **API Rate Limiting**: Prevent abuse
-- [x] **Docker Deployment**: Containerized deployment ✅
-- [ ] **Scheduling**: Automated periodic scans
-- [ ] **CI/CD Pipeline**: Automated testing and deployment
-- [ ] **WebSocket Support**: Real-time scan progress updates
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-**Quick Start:**
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📖 Documentation
-
-- 📘 [Deployment Guide](DEPLOYMENT.md) - Comprehensive deployment instructions
-- 📗 [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to the project
-- 📕 [Security Policy](SECURITY.md) - Security guidelines and vulnerability reporting
-- 📙 [Code of Conduct](CODE_OF_CONDUCT.md) - Community guidelines
-- 📓 [Support](SUPPORT.md) - Getting help and FAQ
-- 📔 [Changelog](CHANGELOG.md) - Version history
-- 🔧 [API Documentation](http://127.0.0.1:8000/docs) - Interactive API docs (when running)
-
-## 📸 Screenshots
-
-> Add screenshots of your application here to showcase its features
-
-## ⚠️ Legal Disclaimer
-
-This tool is for educational and authorized security testing purposes only. Users must:
-
-- ✅ Only scan networks and systems they own or have explicit permission to test
-- ✅ Comply with all applicable laws and regulations
-- ✅ Respect rate limits and target system resources
-- ✅ Use responsibly and ethically
-
-The developers are not responsible for any misuse of this software.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👨‍💻 Author
-
-**Aryan Singh Shaktawat**
-- GitHub: [@aryansinghshaktawat](https://github.com/aryansinghshaktawat)
-
-Want to contribute? Check out our [Contributing Guidelines](CONTRIBUTING.md)!
-
-## 🙏 Acknowledgments
-
-- [Nmap](https://nmap.org/) - The Network Mapper
-- [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
-- [Next.js](https://nextjs.org/) - React framework
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-
-## 💖 Support
-
-If you find this project helpful:
-- ⭐ Star the repository
-- 🐛 Report bugs
-- 💡 Suggest features
-- 🔀 Submit pull requests
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-<div align="center">
+## 🐳 Docker Compose Deployment
 
-**⭐ Star this repository if you found it helpful! ⭐**
+To build and run both services in isolated containers:
 
-Made with ❤️ by [Aryan Singh Shaktawat](https://github.com/aryansinghshaktawat)
+```bash
+docker-compose up --build -d
+```
 
-[Report Bug](https://github.com/aryansinghshaktawat/vuln-scanner-webapp/issues/new?template=bug_report.md) • [Request Feature](https://github.com/aryansinghshaktawat/vuln-scanner-webapp/issues/new?template=feature_request.md) • [Ask Question](https://github.com/aryansinghshaktawat/vuln-scanner-webapp/discussions)
+- **Frontend Dashboard**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:8000](http://localhost:8000)
+- **Interactive OpenAPI Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-</div>
+To stop the containers:
+```bash
+docker-compose down
+```
+
+---
+
+## ⚙️ Configuration (`.env`)
+
+Configure the backend via `backend/.env` (see `backend/.env.example` for all options):
+
+```ini
+# Server
+HOST=127.0.0.1
+PORT=8000
+LOG_LEVEL=INFO
+
+# Security & CORS
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
+# Target Allowlist (Permitted targets: IP, CIDR, or Hostname)
+ALLOWED_TARGETS=127.0.0.1,127.0.0.0/8,192.168.0.0/16,10.0.0.0/8,localhost,scanme.nmap.org
+
+# Rate Limits
+DIAGNOSTICS_RATE_LIMIT=30/minute
+SCAN_RATE_LIMIT=5/minute
+
+# Execution Timeouts & Bounds
+MAX_CONCURRENT_SCANS=2
+NMAP_QUICK_TIMEOUT=60
+NMAP_SERVICE_TIMEOUT=180
+NMAP_VULN_TIMEOUT=300
+DNS_TIMEOUT=5.0
+TCP_CONNECT_TIMEOUT=5.0
+
+# Database
+DATABASE_URL=sqlite+aiosqlite:///./data/netscope.db
+```
+
+---
+
+## 🧪 Testing
+
+NetScope includes a complete automated test suite covering unit tests and API integration tests:
+
+```bash
+cd backend
+source .venv/bin/activate
+
+# Run full pytest test suite
+pytest -v
+```
+
+**Results:**
+```
+======================== 54 passed in 0.52s ========================
+```
+
+To run frontend build & type checks:
+```bash
+cd frontend
+npm run build
+```
+
+For more details on tests and coverage, see [docs/TESTING.md](docs/TESTING.md).
+
+---
+
+## 🛡️ Security Limitations & Guardrails
+
+- **Defensive Scope**: NetScope is designed strictly for networks you own or are legally authorized to test.
+- **TCP Connect Scans**: By default, scans use TCP connect (`-sT`), allowing execution inside unprivileged non-root containers without needing raw network socket privileges (`CAP_NET_RAW`).
+- **Firewalls & Filters**: Packet drops, firewall filtering, and rate limits on target routers can cause ports to appear closed or filtered. A failed connection does not confirm a host outage.
+- **Allowlist Enforced**: Targets outside `ALLOWED_TARGETS` are rejected with HTTP 403 Forbidden.
+
+For complete security disclosure, review [docs/SECURITY.md](docs/SECURITY.md).
+
+---
+
+## 📖 Documentation Index
+
+- 📘 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — System architecture, design decisions, and data models
+- 📗 [docs/API.md](docs/API.md) — Complete REST API v1 endpoint specifications and payload schemas
+- 📕 [docs/SECURITY.md](docs/SECURITY.md) — Security guardrails, allowlists, and subprocess hardening
+- 📙 [docs/TESTING.md](docs/TESTING.md) — Automated testing guide, fixtures, and verification
+- 📓 [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) — Transformation audit and implementation record
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

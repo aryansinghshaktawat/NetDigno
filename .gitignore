@@ -10,8 +10,9 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+/lib/
 lib64/
+!frontend/lib/
 parts/
 sdist/
 var/
@@ -47,12 +48,17 @@ coverage.xml
 
 # Virtual environments
 .env
-.venv
+.venv/
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+
+# SQLite Databases
+*.db
+*.sqlite
+*.sqlite3
 
 # Jupyter Notebook
 .ipynb_checkpoints
